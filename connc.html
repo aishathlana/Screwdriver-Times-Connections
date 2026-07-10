@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create four groups of four!</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --yellow:#f9df6d;
+    --green:#a0c35a;
+    --blue:#b0c4ef;
+    --purple:#ba81c5;
+}
+
+body{
+    font-family:"Libre Franklin",sans-serif;
+    background:#ffffff;
+    margin:0;
+    padding:20px;
+    text-align:center;
+    color:#121212;
+}
+
+h1{
+    margin-bottom:8px;
+    font-weight:800;
+    font-size:48px;
+}
+
+p{
+    margin-top:0;
+}
+
+#status{
+    font-weight:700;
+    margin:25px 0 10px;
+}
+
+.status-row{
+    display:flex;
+    justify-content:center;
+    align-items:baseline;
+    gap:10px;
+    margin:20px 0 10px;
+}
+
+.mistakes-label{
+    margin-bottom:2px;
+    font-size:16px;
+    font-weight:500;
+    color:#6b6b6b;
+    letter-spacing:0.2px;
+}
+
+.mistakes-dots{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+}
+
+.dot{
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    background:#5a594e;
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transform: scale(1);
+    opacity:1;
+}
+
+.dot.used{
+    opacity:0;
+    transform: scale(0.2);
+}
+
+.grid{
+    width:max-content;
+    margin: 10px auto 0;
+    display:grid;
+    grid-template-columns:repeat(4,150px);
+    gap:8px;
+}
+
+.tile{
+    background:#efefe8;
+    border:none;
+    border-radius:8px;
+    width:150px;
+    height:80px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    cursor:pointer;
+    font-weight:700;
+    font-size:18px;
+    text-align:center;
+
+    box-sizing:border-box;
+
+    transition:
+        transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+        opacity 0.25s ease,
+        background 0.2s ease;
+
+    will-change: transform, opacity;
+}
+
+.tile.removing{
+    opacity: 0;
+    transform: scale(0.85);
+}
+
+.tile:hover{
+    transform:translateY(-1px);
+}
+
+.tile.selected{
+    background:#5a594e;
+    color:white;
+}
+
+.group{
+    width: 100%;
+    max-width: 624px;
+    margin: 8px auto;
+    padding: 12px 16px;
+
+    height: auto;
+    min-height: 80px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+    box-sizing: border-box;
+
+    color: #111;
+    font-weight: 700;
+
+    animation: slideIn 1s ease;
+}
+
+.group-words span{
+    opacity: 0;
+    transform: translateY(6px);
+}
+
+.easy{ background:var(--yellow); }
+.medium{ background:var(--green); }
+.hard{ background:var(--blue); }
+.expert{ background:var(--purple); }
+
+.button-row{
+    margin-top:8px;
+    display:flex;
+    justify-content:center;
+    gap:10px;
+}
+
+.button-row button{
+    padding:12px 18px;
+    font-size:16px;
+    font-weight:500;
+    border:none;
+    border-radius:999px;
+    background:#121212;
+    color:white;
+    cursor:pointer;
+}
+
+.button-row button:hover{
+    opacity:0.9;
+}
+
+button{
+    margin-top:10px;
+    padding:12px 24px;
+    font-size:16px;
+    font-weight:700;
+    border:none;
+    border-radius:999px;
+    background:#121212;
+    color:white;
+    cursor:pointer;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+    100% { transform: translateX(0); }
+}
+
+.shake {
+    animation: shake 0.40s ease;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.group-title{
+    opacity: 0;
+    animation: fadeUp 2.2s ease forwards;
+}
+
+.group-words{
+    margin:0;
+    line-height:1.1;
+    opacity: 1;
+    transform: none;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.group-words.show{
+    animation: fadeUp 0.3s ease forwards;
+}
+
+.group{
+    flex-direction: column;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 2px;
+    animation: slideIn 0.35s ease;
+}
+
+.group-title{
+    margin:0;
+    line-height: 1.1;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.word{
+    opacity: 0;
+    display:inline-block;
+    margin-right: 4px;
+    transition: opacity 1s ease;
+}
+
+.word.show{
+    opacity: 1;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Connections</h1>
+<p>Create four groups of four!</p>
+
+<div id="solved"></div>
+<div class="grid" id="grid"></div>
+
+<div id="status">
+    <div class="status-row">
+        <div class="mistakes-label">Mistakes Remaining:</div>
+        <div class="mistakes-dots" id="mistakesDots">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+    </div>
+</div>
+
+<div class="button-row">
+    <button onclick="shuffleBoard()">Shuffle</button>
+    <button onclick="deselectAll()">Deselect All</button>
+    <button onclick="submitGuess()">Submit</button>
+</div>
+
+<script>
+const groups = [
+{
+    category: "SOMETHING I WANT TO CONFESS",
+    difficulty: "easy",
+    words: ["I","LOVE","YOU","RAYYAN"]
+},
+{
+    category: "CHARACTERS IN MOVIES/SERIES WE'VE WATCHED",
+    difficulty: "medium",
+    words: ["SCOTT","VICTORIA","HANNAH","MICHAEL"]
+},
+{
+    category: "GAMES WE PLAY TOGETHER",
+    difficulty: "hard",
+    words: ["8 BALL","ANAGRAMS","WORDHUNT","BASKETBALL"]
+},
+{
+    category: "THINGS WE'VE DONE ON DATES",
+    difficulty: "expert",
+    words: ["MOVIE","CLAY","FOOTBALL","LEGO"]
+}
+];
+
+let mistakes = 0;
+let selected = [];
+let solvedCount = 0;
+let gameOver = false;
+
+let allWords = groups.flatMap(g => g.words);
+
+shuffle(allWords);
+
+const grid = document.getElementById("grid");
+
+function updateMistakes() {
+    const dots = document.querySelectorAll(".dot");
+
+    dots.forEach((dot, index) => {
+        const reverseIndex = dots.length - 1 - index;
+
+        if (reverseIndex < mistakes) {
+            dot.classList.add("used");
+        } else {
+            dot.classList.remove("used");
+        }
+    });
+}
+
+function toggleWord(word) {
+    if (selected.includes(word)) {
+        selected = selected.filter(w => w !== word);
+    } else if (selected.length < 4) {
+        selected.push(word);
+    }
+    renderBoard();
+}
+
+function submitGuess() {
+    if (gameOver) return;
+
+    if (selected.length !== 4) {
+        alert("Select exactly 4 words.");
+        return;
+    }
+
+    const match = groups.find(group =>
+        group.words.every(word => selected.includes(word))
+    );
+
+    if (match) {
+    solvedCount++;
+
+    const solved = document.getElementById("solved");
+
+    const div = document.createElement("div");
+    div.className = `group ${match.difficulty}`;
+
+    const title = document.createElement("div");
+    title.className = "group-title";
+    title.textContent = match.category;
+
+    const words = document.createElement("div");
+    words.className = "group-words";
+
+
+    words.innerHTML = match.words
+        .map((w, i) =>
+            `<span class="word">${w}${i < match.words.length - 1 ? ", " : ""}</span>`
+        )
+        .join("");
+
+    
+
+    selected = [];
+
+match.words.forEach(word => {
+    const idx = allWords.indexOf(word);
+    if (idx !== -1) {
+        allWords[idx] = null;
+    }
+});
+
+setTimeout(() => {
+    renderBoard();
+
+    // show category first AND reserve space for words
+div.appendChild(title);
+div.appendChild(words);
+solved.appendChild(div);
+
+// reveal words later
+setTimeout(() => {
+
+    const wordEls = words.querySelectorAll(".word");
+        wordEls.forEach((el, i) => {
+            setTimeout(() => {
+                el.classList.add("show");
+            }, i * 800);
+        });
+
+    }, 2000);
+
+}, 100);
+    if (solvedCount === groups.length) {
+    setTimeout(() => alert("You solved all groups!"), 6000);
+}
+}
+ else {
+        mistakes++;
+        shakeGrid();
+        selected = [];
+        updateMistakes();
+        renderBoard();
+
+        if (mistakes >= 4) {
+            gameOver = true;
+            revealRemainingGroups();
+            setTimeout(() => alert("Game Over!"), 18000);
+        }
+    }
+}
+
+function revealRemainingGroups() {
+    const solved = document.getElementById("solved");
+
+    let revealIndex = 0;
+
+    groups.forEach(group => {
+        const stillUnsolved = group.words.some(word =>
+            allWords.includes(word)
+        );
+
+        if (!stillUnsolved) return;
+
+        setTimeout(() => {
+
+            const div = document.createElement("div");
+            div.className = `group ${group.difficulty}`;
+
+            const title = document.createElement("div");
+            title.className = "group-title";
+            title.textContent = group.category;
+            title.style.opacity = "0";
+
+            const words = document.createElement("div");
+            words.className = "group-words";
+
+            
+
+            requestAnimationFrame(() => {
+                title.style.transition = "opacity 0.45s ease";
+                title.style.opacity = "1";
+            });
+
+            setTimeout(() => {
+                words.innerHTML = group.words
+                    .map((w, i) =>
+                        `<span class="word">${w}${i < group.words.length - 1 ? ", " : ""}</span>`
+                    )
+                    .join("");
+
+                
+
+            }, 900);
+
+            group.words.forEach(word => {
+                const idx = allWords.indexOf(word);
+                if (idx !== -1) allWords[idx] = null;
+            });
+
+            renderBoard();
+
+        }, revealIndex * 2200);
+
+        revealIndex++;
+    });
+}
+
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+function shuffleBoard() {
+    shuffle(allWords);
+    renderBoard();
+}
+
+function deselectAll() {
+    selected = [];
+    renderBoard();
+}
+
+function renderBoard() {
+    grid.innerHTML = "";
+
+    allWords.forEach(word => {
+        if (!word) return;
+
+        const tile = document.createElement("div");
+        tile.className = "tile";
+
+        if (selected.includes(word)) {
+            tile.classList.add("selected");
+        }
+
+        tile.textContent = word;
+        tile.onclick = () => toggleWord(word);
+
+        grid.appendChild(tile);
+    });
+}
+
+function shakeGrid() {
+    const gridEl = document.getElementById("grid");
+    gridEl.classList.add("shake");
+    setTimeout(() => gridEl.classList.remove("shake"), 350);
+}
+
+renderBoard();
+updateMistakes();
+</script>
+
+</body>
+</html>
